@@ -28,6 +28,7 @@ jobs:
       - script: pnpm install --prefer-frozen-lockfile --ignore-scripts
         displayName: Install Deps
       - script: pnpx tsc --project tsconfig.json
+        workingDirectory: $(System.DefaultWorkingDirectory)
         displayName: Compile
       #  - script: |
       #      pnpm install --prefer-frozen-lockfile --ignore-scripts

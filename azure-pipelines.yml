@@ -25,9 +25,9 @@ jobs:
           PNPM_VERSION: $(PNPM_VERSION)
       - script: pnpm server start --background
         displayName: Start PNPM Store Server
-      - script: |
-          pnpm install --prefer-frozen-lockfile --ignore-scripts
-          pnpx tsc --project tsconfig.json
+      - script: pnpm install --prefer-frozen-lockfile --ignore-scripts
+        displayName: Install Deps
+      - script: pnpx tsc --project tsconfig.json
         displayName: Compile
       #  - script: |
       #      pnpm install --prefer-frozen-lockfile --ignore-scripts

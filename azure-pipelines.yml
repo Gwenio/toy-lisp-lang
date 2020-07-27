@@ -1,0 +1,118 @@
+
+trigger:
+- master
+- pipeline
+
+variables:
+- group: toy-lisp-lang
+- name: PNPM_VERSION
+  value: '5'
+- name: GLOBAL_NODE_VERSION
+  value: '14'
+
+jobs:
+- job: coverage
+  displayName: Test Coverage
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(GLOBAL_NODE_VERSION)
+    displayName: "Install Node.js"
+  - script: curl -L https://unpkg.com/@pnpm/self-installer | node
+    displayName: PNPM Install
+    env:
+      PNPM_VERSION: $(PNPM_VERSION)
+  - script: pnpm server start --background
+    displayName: Start PNPM Store Server
+  - script: |
+      pnpm install --prefer-frozen-lockfile --ignore-scripts
+      pnpx tsc --project tsconfig.json
+    displayName: Compile
+#  - script: |
+#      pnpm install --prefer-frozen-lockfile --ignore-scripts
+#      pnpx tsc --project tsconfig.json
+#    displayName: Compile Tests
+#    workingDirectory: meta/test
+#  - script: |
+#      pnpx nyc -r text ava --config ava.coverage.js
+#      pnpx nyc report -r json --nycrc="meta/test/.nycrc.json"
+#      pnpx nyc report -r cobertura --nycrc="meta/test/.nycrc.json"
+#    displayName: Generate Reports
+#    workingDirectory: meta/test
+  - script: pnpm server stop
+    displayName: Stop PNPM Store Server
+    condition: always()
+  - task: PublishCodeCoverageResults@1
+    displayName: Publish Azure Report
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/meta/test/tmp/nyc/cobertura-coverage.xml'
+#  - script: |
+#      bash <(curl https://codecov.io/bash) -t $CODECOV_TOKEN -f tmp/nyc/coverage-final.json
+#    displayName: Publish Codecov Report
+#    workingDirectory: meta/test
+#    env:
+#      CODECOV_TOKEN: $(CODECOV_TOKEN)
+#- job: test
+#  displayName: Test
+#  pool:
+#    vmImage: 'ubuntu-latest'
+#  strategy:
+#    matrix:
+#      Node12:
+#        NVE: '12'
+#      Node10:
+#        NVE: '10'
+#  steps:
+#  - task: NodeTool@0
+#    inputs:
+#      versionSpec: $(GLOBAL_NODE_VERSION)
+#    displayName: "Install Node.js"
+#  - script: curl -L https://unpkg.com/@pnpm/self-installer | node
+#    displayName: PNPM Install
+#    env:
+#      PNPM_VERSION: $(PNPM_VERSION)
+#  - script: pnpm server start --background
+#    displayName: Start PNPM Store Server
+#  - template: .azure/compile_extension.yml
+#  - template: .azure/prepare_extension.yml
+#  - script: |
+#      pnpm install --prefer-frozen-lockfile --ignore-scripts
+#      pnpx tsc --project tsconfig.json
+#    displayName: Compile Tests
+#    workingDirectory: meta/test
+#  - bash: |
+#      pnpm add --global tap-xunit@latest nve@latest
+#      echo "##vso[task.setvariable variable=NODE_VERSION]`pnpx nve $(NVE) node --version`"
+#      (pnpx nve $(NVE) ava --tap | pnpx tap-xunit) > tmp/results.xml
+#    displayName: Run Tests
+#    workingDirectory: meta/test
+#    condition: and(succeeded(), ne(variables['GLOBAL_NODE_VERSION'], variables['NVE']))
+#  - bash: |
+#      pnpm add --global tap-xunit@latest
+#      echo "##vso[task.setvariable variable=NODE_VERSION]`node --version`"
+#      (pnpx ava --tap | pnpx tap-xunit) > tmp/results.xml
+#    displayName: Run Tests
+#    workingDirectory: meta/test
+#    condition: and(succeeded(), eq(variables['GLOBAL_NODE_VERSION'], variables['NVE']))
+#  - task: PublishTestResults@2
+#    displayName: Publish Azure Results
+#    condition: succeededOrFailed()
+#    inputs:
+#      testResultsFormat: 'JUnit'
+#      testResultsFiles: meta/test/tmp/results.xml
+#      testRunTitle: All Tests NodeJS-$(NODE_VERSION)
+#      publishRunAttachments: true
+#  - script: pnpx nve $(NODE_VERSION) ava
+#    condition: and(failed(), ne(variables['GLOBAL_NODE_VERSION'], variables['NVE']))
+#    displayName: AVA Native Results
+#    workingDirectory: meta/test
+#  - script: pnpx ava
+#    condition: and(failed(), eq(variables['GLOBAL_NODE_VERSION'], variables['NVE']))
+#    displayName: AVA Native Results
+#    workingDirectory: meta/test
+#  - script: pnpm server stop
+#    displayName: Stop PNPM Store Server
+#    condition: always()

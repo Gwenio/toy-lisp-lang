@@ -1,5 +1,28 @@
 {
-  "extends": [
-    "config:base"
-  ]
+	"extends": ["config:base"],
+	"semanticCommits": true,
+	"packageRules": [
+		{
+			"languages": ["js"],
+			"packageNames": [
+				"@commitlint/cli",
+				"@commitlint/config-conventional",
+				"@typescript-eslint/eslint-plugin",
+				"@typescript-eslint/parser",
+				"@typescript-eslint/typescript-estree",
+				"conventional-changelog-conventionalcommits",
+				"eslint",
+				"eslint-config-prettier",
+				"eslint-plugin-ava",
+				"eslint-plugin-node",
+				"eslint-plugin-promise",
+				"eslint-plugin-unicorn",
+				"husky",
+				"lint-staged",
+				"markdownlint-cli",
+				"prettier"
+			],
+			"enabled": false
+		}
+	]
 }

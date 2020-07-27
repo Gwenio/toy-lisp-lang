@@ -1,54 +1,53 @@
-
 trigger:
-- master
-- pipeline
+  - master
+  - pipeline
 
 variables:
-- group: toy-lisp-lang
-- name: PNPM_VERSION
-  value: '5'
-- name: GLOBAL_NODE_VERSION
-  value: '14'
+  - group: toy-lisp-lang
+  - name: PNPM_VERSION
+    value: "5"
+  - name: GLOBAL_NODE_VERSION
+    value: "14"
 
 jobs:
-- job: coverage
-  displayName: Test Coverage
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: $(GLOBAL_NODE_VERSION)
-    displayName: "Install Node.js"
-  - script: curl -L https://unpkg.com/@pnpm/self-installer | node
-    displayName: PNPM Install
-    env:
-      PNPM_VERSION: $(PNPM_VERSION)
-  - script: pnpm server start --background
-    displayName: Start PNPM Store Server
-  - script: |
-      pnpm install --prefer-frozen-lockfile --ignore-scripts
-      pnpx tsc --project tsconfig.json
-    displayName: Compile
-#  - script: |
-#      pnpm install --prefer-frozen-lockfile --ignore-scripts
-#      pnpx tsc --project tsconfig.json
-#    displayName: Compile Tests
-#    workingDirectory: meta/test
-#  - script: |
-#      pnpx nyc -r text ava --config ava.coverage.js
-#      pnpx nyc report -r json --nycrc="meta/test/.nycrc.json"
-#      pnpx nyc report -r cobertura --nycrc="meta/test/.nycrc.json"
-#    displayName: Generate Reports
-#    workingDirectory: meta/test
-  - script: pnpm server stop
-    displayName: Stop PNPM Store Server
-    condition: always()
-  - task: PublishCodeCoverageResults@1
-    displayName: Publish Azure Report
-    inputs:
-      codeCoverageTool: Cobertura
-      summaryFileLocation: '$(System.DefaultWorkingDirectory)/meta/test/tmp/nyc/cobertura-coverage.xml'
+  - job: coverage
+    displayName: Test Coverage
+    pool:
+      vmImage: "ubuntu-latest"
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: $(GLOBAL_NODE_VERSION)
+        displayName: "Install Node.js"
+      - script: curl -L https://unpkg.com/@pnpm/self-installer | node
+        displayName: PNPM Install
+        env:
+          PNPM_VERSION: $(PNPM_VERSION)
+      - script: pnpm server start --background
+        displayName: Start PNPM Store Server
+      - script: |
+          pnpm install --prefer-frozen-lockfile --ignore-scripts
+          pnpx tsc --project tsconfig.json
+        displayName: Compile
+      #  - script: |
+      #      pnpm install --prefer-frozen-lockfile --ignore-scripts
+      #      pnpx tsc --project tsconfig.json
+      #    displayName: Compile Tests
+      #    workingDirectory: meta/test
+      #  - script: |
+      #      pnpx nyc -r text ava --config ava.coverage.js
+      #      pnpx nyc report -r json --nycrc="meta/test/.nycrc.json"
+      #      pnpx nyc report -r cobertura --nycrc="meta/test/.nycrc.json"
+      #    displayName: Generate Reports
+      #    workingDirectory: meta/test
+      - script: pnpm server stop
+        displayName: Stop PNPM Store Server
+        condition: always()
+      - task: PublishCodeCoverageResults@1
+        displayName: Publish Azure Report
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: "$(System.DefaultWorkingDirectory)/tmp/nyc/cobertura-coverage.xml"
 #  - script: |
 #      bash <(curl https://codecov.io/bash) -t $CODECOV_TOKEN -f tmp/nyc/coverage-final.json
 #    displayName: Publish Codecov Report

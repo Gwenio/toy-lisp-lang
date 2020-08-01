@@ -31,6 +31,11 @@ export default interface Source {
 	readonly line: number
 
 	/**
+	 * The position in the file.
+	 */
+	readonly position: number
+
+	/**
 	 * The source file name.
 	 */
 	readonly file: string

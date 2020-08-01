@@ -3,7 +3,10 @@
 	"types": [
 		{ "type": "feat", "section": "Features" },
 		{ "type": "fix", "section": "Bug Fixes" },
+		{ "type": "revert", "section": "Reverted" },
+		{ "type": "ci", "hidden": true },
 		{ "type": "chore", "hidden": true },
+		{ "type": "code", "hidden": true },
 		{ "type": "docs", "hidden": true },
 		{ "type": "style", "hidden": true },
 		{ "type": "refactor", "hidden": true },

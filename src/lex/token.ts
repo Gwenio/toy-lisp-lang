@@ -33,6 +33,11 @@ export default class Token implements Source {
 	readonly line: number
 
 	/**
+	 * The position in the file the Token begins at.
+	 */
+	readonly position: number
+
+	/**
 	 *	The name of the file the Token comes from.
 	 */
 	readonly file: string
@@ -56,6 +61,7 @@ export default class Token implements Source {
 	public constructor(s: Source, x: string, t: string[]) {
 		this.column = s.column
 		this.line = s.line
+		this.position = s.position
 		this.file = s.file
 		this.content = x
 		for (const value of t) {

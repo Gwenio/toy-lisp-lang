@@ -17,6 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 import Source from './source'
+import MatchInfo from './match_info'
 
 /**
  * Tracks the state of the tokinization process.
@@ -31,11 +32,6 @@ export default class State implements Source {
 	 * The column number for the next potential Token.
 	 */
 	private c = 1
-
-	/**
-	 * Indicates if the input may contain a new line.
-	 */
-	private eol = false
 
 	/**
 	 * Calculates the new column number.
@@ -104,47 +100,33 @@ export default class State implements Source {
 	/**
 	 * Consumes the current token and updates the line and column number.
 	 */
-	consume(): void {
-		if (this.eol) {
-			const lines = this.data.slice(0, this.offset).split(/(\n\r)|(\r\n)|[\n\r]/)
+	consume({ length, multiline, tabs }: MatchInfo): void {
+		const head = this.data.slice(this.offset, length)
+		if (multiline) {
+			const lines = head.split(/(\n\r)|(\r\n)|[\n\r]/)
 			const n = lines.length - 1
 			this.l += n
-			this.c = this.u(lines[n], 1)
+			this.c = tabs ? this.u(lines[n], 1) : lines[n].length
+		} else if (tabs) {
+			this.c = this.u(head, this.c)
 		} else {
-			this.c = this.u(this.data.slice(0, this.offset), this.c)
+			this.c += length
 		}
-		this.data = this.data.slice(this.offset)
-		this.offset = 0
-		this.eol = false
+		this.offset += length
 	}
 
 	/**
-	 * Assigns data to the next token.
-	 * @param span The length of the data to assign to the next token.
-	 */
-	advance(span: number): void {
-		this.offset += span
-	}
-
-	/**
-	 * Signals that the next call to consume() should update the line number.
-	 */
-	newLine(): void {
-		this.eol = true
-	}
-
-	/**
-	 * Gets the data not assigned to the next token.
+	 * Gets the data that has not been consumed.
 	 */
 	get tail(): string {
 		return this.data.slice(this.offset)
 	}
 
 	/**
-	 * Gets the data assigned to the next token.
+	 * Gets the total number of characters that have been consumed.
 	 */
-	get head(): string {
-		return this.data.slice(0, this.offset)
+	get position(): number {
+		return this.offset
 	}
 
 	/**
